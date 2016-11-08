@@ -1,0 +1,10 @@
+import requests
+import re
+ip = []
+with open("access.log") as f:
+    for i in re.finditer('^[0-9.]+[0-9.]+[0-9.]+[0-9]', f.read(), re.M):
+        if i.group(0) not in ip:
+            ip.append(i.group(0))
+    for i in sorted(ip):
+            print(i)    
+           
