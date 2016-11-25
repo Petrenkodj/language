@@ -1,0 +1,30 @@
+import requests 
+import datetime 
+r = requests.get('https://api.meetup.com/2/open_events?&sign=true&lat=51.30&country=en&topic=web&city=london&state=bl&lon=-00.07&time=,1w&key=366e79314c5d2c70624e355c288505e')
+f = r.json()
+
+file = open("tusa.html", "w+", encoding='utf-8') 
+file.write("<style type='text/css'> .content { margin: 0 auto 50px; width:1300px; background-color: black; color: white; border: 10px solid gray;  padding: 10px;} .date {margin: 0 auto; width:1300px; }  </style>") 
+c = datetime.date.today() 
+d = c + datetime.timedelta(days=7) 
+file.write("<h2 align='center'>"  + str(c.strftime('%d %B %Y')) +" for "+ str(d.strftime('%d %B %Y')) + "</h2>")
+for item in f['results']: 
+    time = datetime.datetime.fromtimestamp(int(str(item['time'])[0:10])) 
+    file.write("<div class='date'>" + str(time.strftime('%B %d') + "</div>")) 
+    file.write("<div class='content'>") 
+    file.write("<span>" + str(time.strftime('%H:%M') + "</span><h2 align='center'>" + str((item['group'])['name']) + "</h2>")) 
+    try: 
+        file.write("<div align='center'>Address: " + str((item['venue'])['address_1']) + "</div>") 
+    except: 
+        pass 
+    try: 
+        file.write("<div align='center'>Another address: " + str((item['venue'])['address_2']) + "</div>") 
+    except: 
+        pass 
+    file.write("<div align='center'>" + str(item['name'] + "</div>")) 
+    try: 
+        file.write("<p>" + str(item['description']) + "</p>") 
+    except: 
+      pass 
+    file.write("</div>") 
+file.close()
