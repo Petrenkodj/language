@@ -1,0 +1,26 @@
+var fs = require('fs');
+
+const ipr = new RegExp('(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}', 'g');
+let IP = {};
+
+fs.readFile('access.log', {encoding: 'utf8'}, function (err, data) {
+    if (err) throw err;
+	
+	let m = [];
+	let sIP;
+	while(sIP = ipr.exec(data)) {
+		let lIP = sIP[0].split('.');
+		lIP.pop();
+		m = lIP.join('.');
+		
+		if (!(m in IP)) IP[m] = [];
+		
+		if (IP[m].indexOf(sIP[0]) == -1) IP[m].push(sIP[0]);
+	};
+	
+	for (m in IP) {
+		for (sIP in IP[m]) {
+			console.log(IP[m][sIP]);
+		}
+	}
+});
