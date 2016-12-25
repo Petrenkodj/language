@@ -1,0 +1,72 @@
+var request = require('request');
+
+const U = "http://www.mosigra.ru";
+let P = [];
+let Mails = [];
+let URLS = [];
+URLS.push(U);
+
+const urlR = new RegExp('href="(?:(<U>))?(?:\\.\\.)*(?:\\/?[a-zA-Z0-9%-])+\\??(?:[a-zA-Z0-9]+\\=[a-zA-Z0-9_%-]+[;&]?)*(?:\\.html|\\.htm|\\/)?"'.replace("<U>", U),'g');
+const mailR = new RegExp('[a-zA-Z0-9]+(?:[._+%-]+[a-zA-Z0-9]+)*@(?:[a-zA-Z0-9]?)+[.]((ru)|(com))','g');
+
+function Parse() {
+	if ((P.length < 10) && (URLS.length > 0)) {
+		let cURL = URLS.pop();
+		
+		if (P.indexOf(cURL) != -1) {
+			Parse();
+			return;
+		}
+		
+		P.push(cURL);
+		
+		
+		request(cURL, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				const allText = body;
+
+				let sMail;
+				while(sMail = mailR.exec(allText)) {
+					if(Mails.indexOf(sMail[0]) == -1) {
+						Mails.push(sMail[0]);
+					}
+				}
+				
+				let sURL;
+				let tempURL = [];
+				while(sURL = urlR.exec(allText)) {
+					tempURL.push(sURL[0]);
+				}
+				
+				if(tempURL != null) {
+					
+					tempURL.forEach(function (sURL, i, arr) {
+						let subURL = sURL.substring(0, sURL.length - 1);
+						subURL = subURL.replace('href=\"', "")
+						let nURL = subURL;
+						if (subURL[0] == "/") {
+							nURL = U + subURL;
+						}
+						if (URLS.indexOf(nURL) == -1) {
+							URLS.push(nURL);
+						}
+					
+					});
+				}
+
+				Parse();
+			}
+			else {
+				console.log(error);
+			}
+		});
+	}
+	else {
+		console.log("\nList of found E-mails: ");
+		Mails.forEach(function (Email, i, arr) {
+			console.log(Email);
+		});
+	}
+}
+
+Parse();
